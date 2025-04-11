@@ -1,0 +1,62 @@
+import mongoose ,{Schema,Document} from "mongoose";
+
+export interface Message extends Document{
+    _id: string; //Even though Mongoose provides _id at runtime, 
+    // TypeScript needs to see it in your interface to allow you to use it without type assertions.
+    content:string;
+    createdAt: Date
+}
+// Note : in mongose use String and in type Script use string
+const MessageSchema: Schema<Message> = new mongoose.Schema({
+    content: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+  });
+  
+  export interface User extends Document {
+    username: string;
+    email: string;
+    password: string;
+    
+    isAcceptingMessages: boolean;
+    messages: Message[];
+  }
+  
+  // Updated User schema
+  const UserSchema: Schema<User> = new mongoose.Schema({
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      trim: true,
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      match: [/.+\@.+\..+/, 'Please use a valid email address'],
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+    },
+   
+    isAcceptingMessages: {
+      type: Boolean,
+      default: true,
+    },
+    messages: [MessageSchema],
+  });
+  
+  const UserModel =
+    (mongoose.models.User as mongoose.Model<User>) ||
+    mongoose.model<User>('User', UserSchema);
+  
+  export default UserModel;
+
